@@ -1,6 +1,6 @@
 ## Getting Started
 
-![IMG_20230124_222400_1](https://i.ibb.co/D7xTPDD/Screenshot-443.png)
+![IMG](https://i.ibb.co/sF0zpvv/Screenshot-443.png)
 
 Cek .env lalu sesuaikan dengan settingan kalian
 
