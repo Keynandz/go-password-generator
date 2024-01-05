@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Password Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(45deg, #a6d4ff, #a6d4ff);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container {
+            text-align: center;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 24px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        .toggle-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+
+        .toggle-btn {
+            background-color: #fff;
+            color: #333;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            margin-right: 8px;
+        }
+
+        .toggle-btn.active {
+            background-color: #4CAF50;
+            color: #fff;
+        }
+
+        #limit {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            background-color: #2196F3;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0b7dda;
+        }
+
+        #passwordResult {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #fff;
+        }
+
+        #passwordResult h2 {
+            color: #333;
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        #passwordContainer {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        #passwordResult p {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        #lengthError {
+            color: red;
+            display: none;
+        }
+
+        #strengthIndicator {
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #strengthText {
+            margin-right: 5px;
+        }
+
+        #strengthValue {
+            font-weight: bold;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 80%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Password Generator</h1>
+        <div id="passwordResult">
+            <h2>Password Result:</h2>
+            <div id="passwordContainer">
+                <h2 id="result"></h2>
+            </div>
+            <div id="strengthIndicator">
+                <span id="strengthText">Strength: </span>
+                <span id="strengthValue"></span>
+            </div>
+        </div>
+        <form id="passwordForm">
+            <label>Password Options:</label>
+            <div class="toggle-container">
+                <button type="button" class="toggle-btn active" data-option="low" name="low">Lowercase</button>
+                <button type="button" class="toggle-btn" data-option="up" name="up">Uppercase</button>
+                <button type="button" class="toggle-btn" data-option="digit" name="digit">Digits</button>
+                <button type="button" class="toggle-btn" data-option="symbol" name="symbol">Symbols</button>
+            </div>
+        
+            <label for="limit">Password Length:</label>
+            <input type="number" id="limit" name="limit" min="4" value="8" required maxlength="2">
+            <p id="lengthError">Length must be at least 4 characters.</p>
+        
+            <button type="button" onclick="generatePassword()">Generate Password</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var defaultButton = document.querySelector('.toggle-btn.active');
+            defaultButton.value = 1;
+    
+            var toggleButtons = document.querySelectorAll('.toggle-btn');
+            var lengthInput = document.getElementById('limit');
+            var lengthError = document.getElementById('lengthError');
+    
+            toggleButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    this.classList.toggle('active');
+                    this.value = this.classList.contains('active') ? 1 : 0;
+    
+                    var selectedOptions = document.querySelectorAll('.toggle-btn.active');
+                    if (selectedOptions.length === 0) {
+                        this.classList.add('active');
+                        this.value = 1;
+                    }
+                });
+            });
+    
+            lengthInput.addEventListener('input', function () {
+                if (lengthInput.value < 4) {
+                    lengthError.style.display = 'block';
+                } else {
+                    lengthError.style.display = 'none';
+                }
+            });
+        });
+    
+        function updatePasswordResult(password) {
+            var resultElement = document.getElementById('result');
+            var passwordContainer = document.getElementById('passwordContainer');
+            
+            // Memotong password setiap 30 karakter
+            var slicedPassword = '';
+            for (var i = 0; i < password.length; i += 30) {
+                slicedPassword += password.slice(i, i + 30) + '<br>';
+            }
+    
+            resultElement.innerHTML = slicedPassword;
+            passwordContainer.scrollTop = passwordContainer.scrollHeight; // Otomatis menggulir ke bawah
+        }
+
+        function updateStrengthIndicator(strength) {
+            var strengthText = document.getElementById('strengthText');
+            var strengthValue = document.getElementById('strengthValue');
+
+            switch (strength) {
+                case 'Strong':
+                    strengthText.style.color = '#4CAF50';
+                    strengthValue.style.color = '#4CAF50';
+                    break;
+                case 'Medium':
+                    strengthText.style.color = '#FFA500';
+                    strengthValue.style.color = '#FFA500';
+                    break;
+                case 'Weak':
+                    strengthText.style.color = '#FF0000';
+                    strengthValue.style.color = '#FF0000';
+                    break;
+                default:
+                    break;
+            }
+
+            strengthValue.textContent = strength;
+        }
+
+        function validatePasswordLength() {
+            var lengthInput = document.getElementById('limit');
+            var lengthError = document.getElementById('lengthError');
+    
+            if (lengthInput.value < 4) {
+                lengthError.style.display = 'block';
+                return false;
+            }
+    
+            lengthError.style.display = 'none';
+            return true;
+        }
+
+        function generatePassword() {
+            if (!validatePasswordLength()) {
+                return;
+            }
+
+            var form = document.getElementById('passwordForm');
+            var formData = new FormData(form);
+
+            document.querySelectorAll('.toggle-btn').forEach(function (button) {
+                formData.append(button.name, button.value);
+            });
+
+            fetch('/keynandz/api/generate/password/?' + new URLSearchParams(formData))
+                .then(response => response.json())
+                .then(data => {
+                    updatePasswordResult(data.result);
+                    updateStrengthIndicator(data.strength);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    var resultElement = document.getElementById('result');
+                    resultElement.innerText = 'Error generating password.';
+                    resultElement.style.color = 'red';
+
+                    updateStrengthIndicator('Weak');
+                });
+        }
+    </script>
+</body>
+</html>
